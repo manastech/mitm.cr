@@ -1,0 +1,13 @@
+name: mitm
+version: 0.1.0
+
+authors:
+  - Juan Wajnerman <waj@manas.tech>
+
+targets:
+  mitm:
+    main: src/mitm.cr
+
+crystal: 0.35.1
+
+license: MIT
