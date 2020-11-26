@@ -3,6 +3,10 @@ require "http/server/handler"
 class Mitm::ProxyHandler
   include HTTP::Handler
 
+  def initialize(certs_path : String = "./certs")
+    @cert_mgr = CertManager.new(certs_path)
+  end
+
   def call(context)
     request = context.request
 
@@ -10,7 +14,7 @@ class Mitm::ProxyHandler
       host, port = request.resource.split(":", 2)
 
       context.response.upgrade do |io|
-        client = OpenSSL::SSL::Socket::Server.new(io, Mitm::CertManager.context_for(host))
+        client = OpenSSL::SSL::Socket::Server.new(io, @cert_mgr.context_for(host))
 
         while client_request = HTTP::Request.from_io(client)
           if client_request.is_a?(HTTP::Request)
