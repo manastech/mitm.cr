@@ -1,4 +1,7 @@
+require "log"
+
 class Mitm::CertManager
+  Log = ::Log.for("mitm.cert-manager")
   @ssl_contexts = Hash(String, OpenSSL::SSL::Context::Server).new
   @mutex = Mutex.new
   @certs_path : Path
@@ -23,6 +26,7 @@ class Mitm::CertManager
         key_file = File.join(@certs_path, "#{host}.key")
 
         unless File.exists?(cert_file) && File.exists?(key_file)
+          Log.info { "Generating certificate for #{host}" }
           req_file = File.join(@certs_path, "#{host}.csr")
 
           Process.run("openssl", ["genrsa", "-out", key_file, "2048"])
