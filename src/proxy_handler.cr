@@ -11,29 +11,45 @@ class Mitm::ProxyHandler
 
       context.response.upgrade do |io|
         client = OpenSSL::SSL::Socket::Server.new(io, Mitm::CertManager.context_for(host))
-        HTTP::Client.new(host, port, tls: true) do |upstream|
-          while client_request = HTTP::Request.from_io(client)
-            if client_request.is_a?(HTTP::Request)
-              upstream.exec(client_request) do |server_response|
-                server_response.to_io(client)
-              end
 
-              client.flush
+        while client_request = HTTP::Request.from_io(client)
+          if client_request.is_a?(HTTP::Request)
+            execute_request(host, port, true, client_request) do |upstream_response|
+              upstream_response.to_io(client)
             end
+
+            client.flush
           end
         end
       end
     elsif request.resource.starts_with?("http://")
       uri = URI.parse(request.resource)
-      HTTP::Client.new(uri.host.not_nil!, uri.port || 80) do |upstream|
-        upstream.exec(request) do |upstream_response|
-          context.response.status_code = upstream_response.status_code
-          context.response.headers.merge!(upstream_response.headers)
-          IO.copy(upstream_response.body_io, context.response)
+
+      execute_request(uri.host.not_nil!, uri.port || 80, false, request) do |upstream_response|
+        context.response.status_code = upstream_response.status_code
+        context.response.headers.merge!(upstream_response.headers)
+
+        if string_body = upstream_response.body?
+          context.response.print(string_body)
+        elsif body_io = upstream_response.body_io?
+          IO.copy(body_io, context.response)
         end
       end
     else
       call_next(context)
+    end
+  end
+
+  def execute_request(host, port, tls, request : HTTP::Request, &block : HTTP::Client::Response ->)
+    request.headers.delete("Accept-Encoding")
+
+    HTTP::Client.new(host, port, tls) do |upstream|
+      upstream.exec(request) do |upstream_response|
+        upstream_response.headers.delete("Transfer-Encoding")
+        upstream_response.headers.delete("Content-Encoding")
+        upstream_response.headers.delete("Content-Length")
+        yield upstream_response
+      end
     end
   end
 end
