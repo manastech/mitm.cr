@@ -6,7 +6,7 @@ authors:
 
 targets:
   mitm:
-    main: src/mitm.cr
+    main: src/main.cr
 
 crystal: 0.35.1
 
