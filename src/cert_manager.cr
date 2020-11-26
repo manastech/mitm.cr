@@ -4,11 +4,13 @@ class Mitm::CertManager
   @certs_path : Path
   @ca_crt_path : Path
   @ca_key_path : Path
+  @ca_srl_path : Path
 
   def initialize(path)
     @root_path = Path.new(path)
     @ca_crt_path = @root_path / "ca.crt"
     @ca_key_path = @root_path / "ca.key"
+    @ca_srl_path = @root_path / "ca.srl"
     @certs_path = @root_path / "hosts"
 
     Dir.mkdir_p @certs_path
@@ -24,7 +26,7 @@ class Mitm::CertManager
           req_file = @certs_path / "#{host}.csr"
           `openssl genrsa -out #{key_file} 2048`
           `openssl req -new -sha256 -key #{key_file} -subj "/CN=#{host}" -out #{req_file}`
-          `openssl x509 -req -in #{req_file} -CA #{@ca_crt_path} -CAkey #{@ca_key_path} -CAcreateserial -out #{cert_file} -days 50000 -sha256`
+          `openssl x509 -req -in #{req_file} -CA #{@ca_crt_path} -CAkey #{@ca_key_path} -CAcreateserial -CAserial #{@ca_srl_path} -out #{cert_file} -days 50000 -sha256`
         end
 
         ssl_context = OpenSSL::SSL::Context::Server.new
