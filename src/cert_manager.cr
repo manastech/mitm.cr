@@ -13,6 +13,15 @@ class Mitm::CertManager
     @root_path = Path.new(path)
     @ca_crt_path = File.join(@root_path, "ca.crt")
     @ca_key_path = File.join(@root_path, "ca.key")
+
+    unless File.exists?(@ca_crt_path)
+      raise "Could not find CA certificate file at #{@ca_crt_path}"
+    end
+
+    unless File.exists?(@ca_key_path)
+      raise "Could not find CA private key file at #{@ca_key_path}"
+    end
+
     @ca_srl_path = File.join(@root_path, "ca.srl")
     @certs_path = @root_path / "hosts"
 
