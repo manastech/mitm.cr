@@ -8,7 +8,32 @@ TODO: Write installation instructions here
 
 ## Usage
 
-TODO: Write usage instructions here
+### Create CA certificate
+
+1. Create directory for certificates
+```
+$ mkdir certs
+```
+
+2. Generate a private key file
+```
+$ openssl genrsa -out certs/ca.key
+```
+
+3. Generate a self signed certificate
+```
+$ openssl req -x509 -new -key certs/ca.key -days 50000 -out certs/ca.crt -subj "/CN=mitm.cr"
+```
+
+4. Install the generated certificate in your browser
+
+
+### Run the standalone proxy server
+```
+$ crystal src/main.cr
+```
+
+The proxy server will start and listen on port 8080
 
 ## Development
 
