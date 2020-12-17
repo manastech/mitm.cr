@@ -1,4 +1,4 @@
-require "./*"
+require "./mitm"
 require "http/server"
 
 handlers = [
