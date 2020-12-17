@@ -3,8 +3,8 @@ require "http/server/handler"
 class Mitm::ProxyHandler
   include HTTP::Handler
 
-  def initialize(certs_path : String = "./certs")
-    @cert_mgr = CertManager.new(certs_path)
+  def initialize(certs_path : String = "./certs", ca : Bool = true)
+    @cert_mgr = CertManager.new(certs_path, ca)
   end
 
   def call(context)
