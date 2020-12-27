@@ -3,7 +3,7 @@ require "http/server/handler"
 class Mitm::ProxyHandler
   include HTTP::Handler
 
-  Log = ::Log.for("Mitm::ProxyHandler")
+  Log = Mitm::Log.for("ProxyHandler")
 
   def initialize(certs_path : String = "./certs", ca : Bool = true)
     @cert_mgr = CertManager.new(certs_path, ca)
