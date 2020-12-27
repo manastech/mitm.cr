@@ -3,6 +3,8 @@ require "http/server/handler"
 class Mitm::ProxyHandler
   include HTTP::Handler
 
+  Log = ::Log.for("Mitm::ProxyHandler")
+
   def initialize(certs_path : String = "./certs", ca : Bool = true)
     @cert_mgr = CertManager.new(certs_path, ca)
   end
@@ -20,11 +22,14 @@ class Mitm::ProxyHandler
           if client_request.is_a?(HTTP::Request)
             execute_request(host, port, true, client_request) do |upstream_response|
               upstream_response.to_io(client)
+              client.flush
             end
-
-            client.flush
           end
         end
+      rescue e : Exception
+        Log.error(exception: e) { "Error in proxy: #{e.inspect_with_backtrace}" }
+        context.response.status_code = 500
+        context.response.print("Error in proxy: #{e.inspect_with_backtrace}")
       end
     elsif request.resource.starts_with?("http://")
       uri = URI.parse(request.resource)

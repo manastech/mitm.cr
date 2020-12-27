@@ -1,7 +1,7 @@
 require "log"
 
 class Mitm::CertManager
-  Log = ::Log.for("mitm.cert-manager")
+  Log = ::Log.for("Mitm::CertManager")
   @ssl_contexts = Hash(String, OpenSSL::SSL::Context::Server).new
   @mutex = Mutex.new
   @certs_path : Path
