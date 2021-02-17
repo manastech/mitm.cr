@@ -23,6 +23,8 @@ class Mitm::ProxyHandler
             execute_request(host, port, true, client_request) do |upstream_response|
               upstream_response.to_io(client)
               client.flush
+            rescue e : Exception
+              Log.error(exception: e) { "Error sending yelded response to client: #{e.inspect_with_backtrace}" }
             end
           end
         end
@@ -43,6 +45,8 @@ class Mitm::ProxyHandler
         elsif body_io = upstream_response.body_io?
           IO.copy(body_io, context.response)
         end
+      rescue e : Exception
+        Log.error(exception: e) { "Error sending yelded response to client: #{e.inspect_with_backtrace}" }
       end
     else
       call_next(context)
