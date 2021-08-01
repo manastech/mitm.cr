@@ -4,3 +4,6 @@
 /.shards/
 *.dwarf
 /certs/
+Session.vim
+*.swp
+.gdb_history
