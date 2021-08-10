@@ -107,6 +107,19 @@ class Mitm::ProxyHandler
   # be created. Target parameters are supplied with the websocket already
   # connected to the client.
   def open_websocket(host, resource, port, tls, headers, client_ws)
+    # inform server that client doesn't support permessage-deflate compression
+    if headers.try &.includes_word?("Sec-WebSocket-Extensions", "permessage-deflate")
+      Log.debug { "Removing permessage-deflate from Sec-WebSocket-Extensions header" }
+
+      value = headers["Sec-WebSocket-Extensions"]
+      if value.is_a?(Array(String))
+        value.delete("permessage-deflate")
+        headers["Sec-WebSocket-Extensions"] = value
+      else
+        headers.delete("Sec-WebSocket-Extensions")
+      end
+    end
+
     upstream_ws = ::HTTP::WebSocket.new(
       host: host,
       path: resource,
