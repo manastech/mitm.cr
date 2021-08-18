@@ -120,13 +120,19 @@ class Mitm::ProxyHandler
       end
     end
 
-    upstream_ws = ::HTTP::WebSocket.new(
-      host: host,
-      path: resource,
-      port: port,
-      tls: tls,
-      headers: headers
-    )
+    begin
+      upstream_ws = ::HTTP::WebSocket.new(
+        host: host,
+        path: resource,
+        port: port,
+        tls: tls,
+        headers: headers
+      )
+    rescue e : Socket::Error
+      Log.error { "Error opening websocket from proxy to target, host: #{host}, resource: #{resource}, port: #{port}, tls: #{tls}, headers: #{headers}. Error: #{e.inspect_with_backtrace}" }
+      client_ws.close(:internal_server_error)
+      return
+    end
 
     Log.info { "New websocket connection: #{host}:#{port}#{resource}, secure: #{tls}" }
 
