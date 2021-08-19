@@ -25,9 +25,11 @@ class Mitm::ProxyHandler
       host, port = request.resource.split(":", 2)
 
       context.response.upgrade do |io|
-        magic = io.peek.try &.[1]
+        magic = io.peek.try &.[1]?
+        next if magic.nil?
+
         is_secure = false
-        if magic && magic < 32
+        if magic < 32
           is_secure = true
           # Binary data means that it's an SSL handshake on the client side
           client = OpenSSL::SSL::Socket::Server.new(io, @cert_mgr.context_for(host))
