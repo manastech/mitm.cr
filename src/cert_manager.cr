@@ -15,6 +15,11 @@ class Mitm::CertManager
   end
 
   def context_for(host)
+    # String for which we set certs should be less or equal to 64
+    if host.size > 64
+      domain_parts = host.split('.')
+      host = trim_long_domains(domain_parts) if domain_parts.size > 2 # First check if there is subodmain present in domain name
+    end
     @mutex.synchronize do
       @ssl_contexts[host] ||= begin
         cert_file = File.join(@certs_path, "#{host}.crt")
@@ -31,6 +36,16 @@ class Mitm::CertManager
         ssl_context.private_key = key_file
         ssl_context
       end
+    end
+  end
+
+  private def trim_long_domains(domain_parts : Array(String)) : String
+    domain_parts[0] = "*"           # Set subdomain to wildcard first, wildcard works with any subdomain name
+    domain = domain_parts.join(".") # Full name with subdomain format: *.something.example.com
+    if domain.size > 64 && domain_parts.size > 2
+      trim_long_domains(domain_parts[1..])
+    else
+      domain
     end
   end
 
