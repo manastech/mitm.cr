@@ -20,12 +20,17 @@ class Mitm::ProxyHandler
 
   def call(context)
     request = context.request
+    response = context.response
 
     if request.method == "CONNECT"
       host, port = request.resource.split(":", 2)
-
-      context.response.upgrade do |io|
-        magic = io.peek.try &.[1]?
+      counter = 0
+      response.upgrade do |io|
+        Log.error(exception: e) { "Connect counter: #{counter}" }
+        counter += 1
+        peek = io.peek
+        next if peek.nil?
+        magic = peek.[1]?
         next if magic.nil?
 
         is_secure = false
@@ -65,20 +70,20 @@ class Mitm::ProxyHandler
         end
       rescue e : Exception
         Log.error(exception: e) { "Error in proxy: #{e.inspect_with_backtrace}" }
-        context.response.status_code = 500
-        context.response.print("Error in proxy: #{e.inspect_with_backtrace}")
+        response.status_code = 500
+        response.print("Error in proxy: #{e.inspect_with_backtrace}")
       end
     elsif request.resource.starts_with?("http://")
       uri = URI.parse(request.resource)
 
       execute_request(uri.host.not_nil!, uri.port || 80, false, request) do |upstream_response|
-        context.response.status_code = upstream_response.status_code
-        context.response.headers.merge!(upstream_response.headers)
+        response.status_code = upstream_response.status_code
+        response.headers.merge!(upstream_response.headers)
 
         if string_body = upstream_response.body?
-          context.response.print(string_body)
+          response.print(string_body)
         elsif body_io = upstream_response.body_io?
-          IO.copy(body_io, context.response)
+          IO.copy(body_io, response)
         end
       rescue e : Exception
         Log.error(exception: e) { "Error sending yelded response to client: #{e.inspect_with_backtrace}" }
