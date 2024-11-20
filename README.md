@@ -1,10 +1,17 @@
+> [!IMPORTANT]
+> This library is no longer supported or updated by the Manas.Tech,
+> therefore we have archived the repository.
+> 
+> The contents are still available readonly and continue to work as a
+> [shards](https://github.com/crystal-lang/shards/) dependency.
+>
+> If you wish to continue development yourself, we recommend you fork it.
+> We can also arrange to transfer ownership.
+>
+> If you have further questions, please reach out on https://forum.crystal-lang.org
+> or crystal@manas.tech
+
 # mitm
-
-TODO: Write a description here
-
-## Installation
-
-TODO: Write installation instructions here
 
 ## Usage
 
@@ -34,19 +41,3 @@ $ crystal src/main.cr
 ```
 
 The proxy server will start and listen on port 8080
-
-## Development
-
-TODO: Write development instructions here
-
-## Contributing
-
-1. Fork it (<https://github.com/your-github-user/mitm.cr/fork>)
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
-
-## Contributors
-
-- [your-name-here](https://github.com/your-github-user) - creator and maintainer
